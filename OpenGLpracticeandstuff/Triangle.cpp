@@ -21,8 +21,9 @@ const char* fragmentShaderSource = "#version 330 core\n"
 	"out vec4 FragColour;\n"
 	"void main()\n"
 	"{\n"
-	"	FragColour = vec4(0.5f, 0.4f, 0.9f, 1.0f);\n"
+	"	FragColour = vec4(0.3f, 0.9f, 0.1f, 1.0f);\n"
 	"}\0";
+
 
 int main()
 {
@@ -35,7 +36,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);		// If on Mac OS X
 
-	GLFWwindow* window = glfwCreateWindow(800, 600, "My Window real and verified", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(800, 600, "Window Created, Yatta!!", NULL, NULL);
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GFL Window" << std::endl;
@@ -70,16 +71,11 @@ int main()
 	}
 
 
-
+	
 	// Fragment Shader
-	unsigned int fragmentShader;
-	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-
-	// Assigning fragment shader source code to shader object, and compiling
+	unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
 	glCompileShader(fragmentShader);
-
-	// Checking for compile time errors for fragment shader
 	int successfrag;
 	char infoLogfrag[512];
 	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &successfrag);
@@ -91,16 +87,12 @@ int main()
 
 	// Creating the Shader Program
 
-	unsigned int shaderProgram;
-	shaderProgram = glCreateProgram();
-	
-	//Linking,
+	unsigned int shaderProgram = glCreateProgram();
 	glAttachShader(shaderProgram, vertexShader);
 	glAttachShader(shaderProgram, fragmentShader);
 
 	glLinkProgram(shaderProgram);
 
-	// Checking program link failure
 	int successlink;
 	char infoLoglink[512];
 	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &successlink);
@@ -111,7 +103,7 @@ int main()
 
 	glUseProgram(shaderProgram);
 
-	// Deleting shader objects
+	// Deleting shader objects, as their purpose is fulfilled
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
@@ -121,26 +113,18 @@ int main()
 	
 	float vertices[] = {
 		// To render 2D triangle
-		-0.5f, -0.5f, 0.0f,		// IIIrd Quadrant
-		0.5f, -0.5f, 0.0f,		// IVth Quadrant
-		0.0f, 0.5f, 0.0f,		// Between Ist and IInd Quadrant
-		//0.0f, 0.5f, 0.0f,		//Overlap
-		//-0.5f, 1.0f, 0.0f,
-		//0.5f, 1.0f, 0.0f
+		0.5f, 0.5f, 0.0f,
+		0.5f, -0.5f, 0.0f,
+		-0.5f, -0.5f, 0.0f,
+		-0.5f, 0.5f, 0.0f
 	};
 
-	/*
+	// To create a Rectangle
 	unsigned int indices[] = {
-		0, 1, 3,
-
-	}
-	*/
-
-	float vertices2[] = {
-		0.0f, 0.5f, 0.0f,
-		-0.5f, 1.0f, 0.0f,
-		0.5f, 1.0f, 0.0f
+		0, 1, 3,	// First Triangle
+		1, 2, 3		// Second Triangle
 	};
+
 
 	// Creating Vertex Buffer Object
 	unsigned int VBO;
@@ -161,13 +145,18 @@ int main()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	
+
 
 	// A VAO is used to draw objects with more ease
 
 	// Creating Vertex Array Object
 	unsigned int VAO;
 	glGenVertexArrays(1, &VAO);
+
+
+	// Creating Element Buffer Object
+	unsigned int EBO;
+	glGenBuffers(1, &EBO);
 
 	// Linking VAO
  
@@ -177,16 +166,15 @@ int main()
 	// 2. Copy vertices array in buffer for opengl to use
 	glBindBuffer(GL_ARRAY_BUFFER, VAO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	// 3. Set Vertex Attribute Pointers
+	// 3. Copy index array in element buffer for opengl to use
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	// 4. Set Vertex Attribute Pointers
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 	// Continued in Render Loop
 
 	
-
-
-
-
 
 	// Render Loop (Frame)
 	while (!glfwWindowShouldClose(window))
@@ -198,15 +186,23 @@ int main()
 		glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		//4. Draw the Object		//Continued
+		//5. Draw the Object		//Continued
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		//glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		// Swap buffers, Check and call event
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+
+	// De-allocate all resources
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
+
+	glDeleteProgram(shaderProgram);
 
 	// Terminate all GLFW
 	glfwTerminate();
@@ -214,11 +210,18 @@ int main()
 	return 0;
 }
 
-// To take some user input (Close window)
+// To take some user input
 void processInput(GLFWwindow* window)
 {
+	// Close Window
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
+
+	// Enable/Disable Wireframe Mode
+	if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS)
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_RELEASE)
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 // If User or OS decides to resize window
