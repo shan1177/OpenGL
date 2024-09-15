@@ -1,1 +1,1 @@
-Learning graphics through OpenGL with learnopengl.com
+Learning graphics through OpenGL with https://learnopengl.com
