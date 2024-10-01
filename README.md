@@ -1,1 +1,1 @@
-Some basic opengl stuff for personal practice and enjoyment
+Learning graphics through OpenGL with https://learnopengl.com
