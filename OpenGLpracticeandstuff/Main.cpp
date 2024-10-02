@@ -10,6 +10,8 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
 void processInput(GLFWwindow* window);
 
+float mixValue = 0.0f;
+
 int main()
 {
 	glfwInit();
@@ -134,7 +136,7 @@ int main()
 
 	// Setting uniforms
 	ourShader.use();
-	glUniform1i(glGetUniformLocation(ourShader.ID, "texture2"), 0);
+	ourShader.setInt("texture1", 0);
 	ourShader.setInt("texture2", 1);
 
 
@@ -154,7 +156,11 @@ int main()
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texture2);
 
-		// Render the triangle
+		// Set texture mix value in the shader
+		//ourShader.use();
+		ourShader.setFloat("mixValue", mixValue);
+
+		// Render the rectangle
 		ourShader.use();
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,0);
@@ -181,6 +187,19 @@ void processInput(GLFWwindow* window)
 	// Close Window
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
+
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+	{
+		mixValue += 0.001f; 
+		if (mixValue >= 1.0f)
+			mixValue = 1.0f;
+	}
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+	{
+		mixValue -= 0.001f;
+		if (mixValue <= 0.0f)
+			mixValue = 0.0f;
+	}
 
 	// Enable/Disable Wireframe Mode
 	if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS)
