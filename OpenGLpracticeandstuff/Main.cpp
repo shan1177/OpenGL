@@ -2,6 +2,10 @@
 #include <GLFW/glfw3.h>
 #include "stb_image.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "shader.h"
 
 #include <iostream>
@@ -147,7 +151,7 @@ int main()
 		processInput(window);
 
 		// Rendering
-		glClearColor(0.6f, 0.0f, 0.2f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		// Bind Texture
@@ -156,14 +160,52 @@ int main()
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texture2);
 
+		// Create Transformations
+		glm::mat4 transform = glm::mat4(1.0f);
+		float scale = static_cast<float>(sin(glfwGetTime()));
+		transform = glm::scale(transform, glm::vec3(scale, scale, scale));
+		transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(1.0f, 0.0f, 1.0f));
+		transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
+		
+
 		// Set texture mix value in the shader
-		//ourShader.use();
+		ourShader.use();
 		ourShader.setFloat("mixValue", mixValue);
 
+		// Get matrix uniform location, set matrix
+		unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
 		// Render the rectangle
-		ourShader.use();
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,0);
+
+
+		transform = glm::mat4(1.0f);
+		transform = glm::scale(transform, glm::vec3(scale, scale, scale));
+		transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(1.0f, 0.0f, 1.0f));
+		transform = glm::translate(transform, glm::vec3(-0.5f, 0.5f, 0.0f));
+
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+
+		transform = glm::mat4(1.0f);
+		transform = glm::scale(transform, glm::vec3(scale, scale, scale));
+		transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 1.0f));
+		transform = glm::translate(transform, glm::vec3(0.5f, 0.5f, 0.0f));
+
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+
+		transform = glm::mat4(1.0f);
+		transform = glm::scale(transform, glm::vec3(scale, scale, scale));
+		transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 1.0f));
+		transform = glm::translate(transform, glm::vec3(-0.5f, -0.5f, 0.0f));
+
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		// Swap buffers, Check and call event
 		glfwSwapBuffers(window);
