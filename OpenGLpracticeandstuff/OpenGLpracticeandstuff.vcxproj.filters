@@ -40,10 +40,16 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader.fs">
+    <None Include="lightshader.fs">
       <Filter>Shader Files</Filter>
     </None>
-    <None Include="shader.vs">
+    <None Include="lightshader.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="lightcubeshader.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="lightcubeshader.fs">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>
