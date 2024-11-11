@@ -140,6 +140,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
+    <ClInclude Include="filesystem.h" />
+    <ClInclude Include="root_directory.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="stb_image.h" />
   </ItemGroup>

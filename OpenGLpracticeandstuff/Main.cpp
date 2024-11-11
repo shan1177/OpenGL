@@ -6,6 +6,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "filesystem.h"
 #include "shader.h"
 #include "camera.h"
 
@@ -16,6 +17,7 @@ void mouse_call_back(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void cursor_enter_callback(GLFWwindow* window, int entry);
 void processInput(GLFWwindow* window);
+unsigned int loadTexture(const char* path);
 
 // Settings
 const unsigned int fullWidth = 800;
@@ -119,54 +121,56 @@ int main()
 	//};
 
 	// Vertices with normals and texture data
-	//float vertices[] = {
-	//	// Positions          // Normals           // Texture Coords
-	//	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-	//	 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-	//	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-	//	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-	//	-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-	//	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+	float vertices[] = {
+		// positions          // normals           // texture coords
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
 
-	//	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
-	//	 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f,
-	//	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
-	//	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
-	//	-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f,
-	//	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
 
-	//	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-	//	-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-	//	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-	//	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-	//	-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-	//	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-	//	 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-	//	 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-	//	 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-	//	 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-	//	 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-	//	 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-	//	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-	//	 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-	//	 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-	//	 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-	//	-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-	//	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
 
-	//	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-	//	 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-	//	 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-	//	 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-	//	-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-	//	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
-	//};
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
+	};
+
+
 
 
 	// Vertices with normals
-	float vertices[] = {
+	/*float vertices[] = {
 		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -208,7 +212,7 @@ int main()
 		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
 		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
 		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
-	};
+	};*/
 
 	glm::vec3 cubePositions[] = {
 		glm::vec3(0.0f,  0.0f,  0.0f),
@@ -238,16 +242,15 @@ int main()
 	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	glBindVertexArray(cubeVAO);
-
 	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	// texture attribute
-	//glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	//glEnableVertexAttribArray(2);
 	// normal attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
+	// texture attribute
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
 
 	unsigned int lightCubeVAO;
 	glGenVertexArrays(1, &lightCubeVAO);
@@ -255,66 +258,22 @@ int main()
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
 	// You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
 	// VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
 	// glBindVertexArray(0);
 
-	// Loading Textures
-	//unsigned int texture1, texture2;
-	
-	//// Texture Reimu
-	//glGenTextures(1, &texture1);
-	//glBindTexture(GL_TEXTURE_2D, texture1);
-	//// Texture Wrapping
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	//// Texture Filtering
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	//// Image Loading, Texture Creation, Mipmap Generation
-	//stbi_set_flip_vertically_on_load(true);
-	//int width, height, nrChannels;
-	//unsigned char* data = stbi_load("data/reimu.jpg", &width, &height, &nrChannels, 0);
-	//if (data)
-	//{
-	//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-	//	glGenerateMipmap(GL_TEXTURE_2D);
-	//}
-	//else
-	//{
-	//	std::cout << "Failed to load texture" << std::endl;
-	//}
-	//stbi_image_free(data);
-
-	//// Texture Wall
-	//glGenTextures(1, &texture2);
-	//glBindTexture(GL_TEXTURE_2D, texture2);
-	//// Texture Wrapping
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	//// Texture Filtering
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	//// Image Loading, Texture Creation, Mipmap Generation
-	//stbi_set_flip_vertically_on_load(true);
-	//data = stbi_load("data/stone01.jpg", &width, &height, &nrChannels, 0);
-	//if (data)
-	//{
-	//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-	//	glGenerateMipmap(GL_TEXTURE_2D);
-	//}
-	//else
-	//{
-	//	std::cout << "Failed to load texture" << std::endl;
-	//}
-	//stbi_image_free(data);
+	//Loading Textures
+	stbi_set_flip_vertically_on_load(true);
+	unsigned int diffuseMap = loadTexture(FileSystem::getPath("data/reimu.jpg").c_str());
+	unsigned int specularMap = loadTexture(FileSystem::getPath("data/reimu_shiny.jpg").c_str());
 
 	// Setting uniforms
-	//ourShader.setInt("texture1", 0);
-	//ourShader.setInt("texture2", 1);
+	lightingShader.use();
+	lightingShader.setInt("material.diffuse", 0);
+	lightingShader.setInt("material.specular", 1);
 		
 
 	// Render Loop (Frame)
@@ -339,10 +298,10 @@ int main()
 		glBindTexture(GL_TEXTURE_2D, texture2);*/
 
 		lightingShader.use();
-		lightingShader.setVec3("lightPos", lightPos);
+		lightingShader.setVec3("light.position", lightPos);
 		lightingShader.setVec3("viewPos", camera.Position);
 
-		// Setting up material uniforms
+		// Setting up material properties
 		lightingShader.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
 		lightingShader.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
 		lightingShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
@@ -374,10 +333,24 @@ int main()
 		// Set texture mix value in the shader
 		//ourShader.setFloat("mixValue", mixValue);
 
+		// Bind diffuse map
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, diffuseMap);
+
+		// Bind specular map
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, specularMap);
+
 		// Render the cube/s
 		glBindVertexArray(cubeVAO);
 
-		for (unsigned int i = 0; i < 10; i++)
+		glm::mat4 model = glm::mat4(1.0f);
+		glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
+		lightingShader.setMat4("model", model);
+		lightingShader.setMat3("normalMatrix", normalMatrix);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		/*for (unsigned int i = 0; i < 10; i++)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, cubePositions[i]);
@@ -390,13 +363,14 @@ int main()
 			lightingShader.setMat3("normalMatrix", normalMatrix);
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
+		}*/
 
 		// Drawing lamp object
 		lightCubeShader.use();
 		lightCubeShader.setMat4("projection", projection);
 		lightCubeShader.setMat4("view", view);
-		glm::mat4 model = glm::mat4(1.0f);
+		//glm::mat4 model = glm::mat4(1.0f);
+		model = glm::mat4(1.0f);
 		model = glm::translate(model, lightPos);
 		model = glm::scale(model, glm::vec3(0.2f));
 		lightCubeShader.setMat4("model", model);
@@ -404,8 +378,8 @@ int main()
 		glm::vec3 lightCubeColor = lightColor;
 		lightCubeShader.setVec3("lightCubeColor", lightCubeColor);
 
-		//lightPos.x = 1.0f * sin(glfwGetTime()) * 2.0f;
-		//lightPos.y = sin(glfwGetTime() / 2.0f) * 1.0f;
+		lightPos.x = 1.0f * sin(glfwGetTime()) * 1.0f;
+		lightPos.y = sin(glfwGetTime() / 2.0f) * 1.0f;
 
 		glBindVertexArray(lightCubeVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -507,4 +481,42 @@ void cursor_enter_callback(GLFWwindow* window, int entry)
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
+}
+
+unsigned int loadTexture(char const* path)
+{
+	unsigned textureID;
+	glGenTextures(1, &textureID);
+
+	int width, height, nrComponents;
+	unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
+	if (data)
+	{
+		GLenum format = GL_RGB;
+		if (nrComponents == 1)
+			format = GL_RED;
+		else if (nrComponents == 3)
+			format = GL_RGB;
+		else if (nrComponents == 4)
+			format = GL_RGBA;
+
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		
+		stbi_image_free(data);
+	}
+
+	else
+	{
+		std::cout << "Texture failed to load at path: " << path << std::endl;
+		stbi_image_free(data);
+	}
+
+	return textureID;
 }
