@@ -291,14 +291,11 @@ int main()
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// Bind Texture
-		/*glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture1);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, texture2);*/
-
 		lightingShader.use();
-		lightingShader.setVec3("light.position", lightPos);
+		lightingShader.setVec3("light.position", camera.Position);
+		lightingShader.setVec3("light.direction", camera.Front);
+		lightingShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));	// Cosine, as we need to compare with cosine value in shader
+		lightingShader.setFloat("light.outerCutOff", glm::cos(glm::radians(17.5)));
 		lightingShader.setVec3("viewPos", camera.Position);
 
 		// Setting up material properties
@@ -322,6 +319,10 @@ int main()
 		lightingShader.setVec3("light.diffuse", diffuseColor);
 		lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 		
+		lightingShader.setFloat("light.constant", 1.0f);
+		lightingShader.setFloat("light.linear", 0.09f);
+		lightingShader.setFloat("light.quadratic", 0.032f);
+
 		glm::mat4 projection = glm::mat4(1.0f);
 		glm::mat4 view = glm::mat4(1.0f);	
 		projection = glm::perspective(glm::radians(camera.Zoom), (float)fullWidth / (float)fullHeight, 0.1f, 100.0f);
@@ -344,17 +345,21 @@ int main()
 		// Render the cube/s
 		glBindVertexArray(cubeVAO);
 
-		glm::mat4 model = glm::mat4(1.0f);
+		/*glm::mat4 model = glm::mat4(1.0f);
 		glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
 		lightingShader.setMat4("model", model);
 		lightingShader.setMat3("normalMatrix", normalMatrix);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDrawArrays(GL_TRIANGLES, 0, 36);*/
 
-		/*for (unsigned int i = 0; i < 10; i++)
+		for (unsigned int i = 0; i < 10; i++)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
+
+			//float angle = 20.0f * i;
+			float angle = 20.0f * i + glfwGetTime() * ((i+1)/2.0f) * 50.0f;
+			
 			model = glm::translate(model, cubePositions[i]);
-			model = glm::rotate(model, (float)glfwGetTime() * (i+1)/2, glm::vec3(1.0f, 0.3f, 0.5f));
+			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 
 			glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
 
@@ -363,26 +368,26 @@ int main()
 			lightingShader.setMat3("normalMatrix", normalMatrix);
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}*/
+		}
 
-		// Drawing lamp object
-		lightCubeShader.use();
-		lightCubeShader.setMat4("projection", projection);
-		lightCubeShader.setMat4("view", view);
+		//Drawing lamp object
+		//lightCubeShader.use();
+		//lightCubeShader.setMat4("projection", projection);
+		//lightCubeShader.setMat4("view", view);
 		//glm::mat4 model = glm::mat4(1.0f);
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, lightPos);
-		model = glm::scale(model, glm::vec3(0.2f));
-		lightCubeShader.setMat4("model", model);
-		
-		glm::vec3 lightCubeColor = lightColor;
-		lightCubeShader.setVec3("lightCubeColor", lightCubeColor);
+		////model = glm::mat4(1.0f);
+		//model = glm::translate(model, lightPos);
+		//model = glm::scale(model, glm::vec3(0.2f));
+		//lightCubeShader.setMat4("model", model);
+		//
+		//glm::vec3 lightCubeColor = lightColor;
+		//lightCubeShader.setVec3("lightCubeColor", lightCubeColor);
 
-		lightPos.x = 1.0f * sin(glfwGetTime()) * 1.0f;
-		lightPos.y = sin(glfwGetTime() / 2.0f) * 1.0f;
+		//lightPos.x = 1.0f * sin(glfwGetTime()) * 1.0f;
+		//lightPos.y = sin(glfwGetTime() / 2.0f) * 1.0f;
 
-		glBindVertexArray(lightCubeVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		//glBindVertexArray(lightCubeVAO);
+		//glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		// Swap buffers, Check and call event
 		glfwSwapBuffers(window);
