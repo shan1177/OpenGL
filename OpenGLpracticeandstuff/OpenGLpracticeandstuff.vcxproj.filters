@@ -44,6 +44,12 @@
     <ClInclude Include="root_directory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="lightshader.fs">
@@ -56,6 +62,18 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="lightcubeshader.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="modelshader.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="modelshader.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="screenshader.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="screenshader.fs">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>
